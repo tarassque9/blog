@@ -1,0 +1,19 @@
+{% extends 'blog/base.html' %} {% block titlle %} Create post {% endblock %} {% block content %}
+
+<form action="{% url 'post_create' %}" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <div class="input-group flex-nowrap">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="addon-wrapping">Title</span>
+            </div>
+            {{ form.title }}
+        </div>
+        <br>
+        <label></label> {{ form.text | safe }} {{ form.media }}
+        <br>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}

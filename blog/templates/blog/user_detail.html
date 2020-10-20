@@ -1,0 +1,15 @@
+{% extends 'blog/base.html' %} {% block titlle %} User detail {% endblock %} {% block content %}
+<div class="card text-center">
+    <div class="card-header">
+        Bloger
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ user.email }}</h5>
+        <p class="card-text">Bloger</p>
+        <form action="{% url 'user_detail' user.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Follow/Unfollow</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'blog/base.html' %} {% block titlle %} Post detail {% endblock %} {% block content %}
+<center>
+    <div class="card">
+        <h5 class="card-header">{{ post.author_name }}</h5>
+        <div class="card-body">
+            <h5 class="card-title">{{ post.title }}</h5>
+            <p class="card-text">{{ post.text }}</p>
+        </div>
+    </div>
+</center>
+{% endblock %}

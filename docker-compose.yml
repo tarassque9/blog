@@ -1,0 +1,39 @@
+version: '3'
+
+services: 
+  web:
+    env_file: 
+      - .env
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/blog_project
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres
+    env_file: 
+      - .env-db
+    volumes:
+      - .:/blog_project
+    ports:
+      - 5432:5432
+  celery:
+    build: .
+    command: celery -A blog_project worker --uid=1 -l INFO
+    volumes:
+      - .:/blog_project
+    depends_on:
+      - db
+      - redis
+  redis:
+    image: redis
+    command: redis-server
+    ports:
+      - '6379:6379'
+
+volumes:
+  postgres_data:
