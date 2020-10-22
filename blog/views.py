@@ -1,5 +1,5 @@
-from django.shortcuts import render, HttpResponseRedirect, HttpResponse
-from django.contrib.auth.views import LogoutView
+from django.shortcuts import render, HttpResponseRedirect, HttpResponse, reverse
+from django.contrib.auth.views import LogoutView, LoginView
 from django.views.generic import View
 from .models import User, Post
 from .forms import LoginForm, PostCreateForm
@@ -9,26 +9,29 @@ from .service import get_user_posts,\
      save_post, follow_unfollow
 from .permissions import LoginRequiredMixin
 from django.shortcuts import redirect
+from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
+from django.views.generic.dates import DateMixin
+from django.contrib import messages
+from django.views.generic.edit import CreateView
 
 
 def redirect_blog(request):
     return redirect('login', permanent=True)
 
 
-class HomeView(LoginRequiredMixin, View):
+class HomeView(LoginRequiredMixin, DateMixin, TemplateView):
     template_name = 'blog/home.html'
+    date_field = '-creation_date'
 
-    def get(self, request):
-        user_id = request.user.id
-        posts = get_user_posts(user_id)
-        followings = get_user_following_objects(user_id)
-        followers = get_user_followers_objects(user_id)
-        blogers = User.objects.all()
-        context = {'posts': posts,
-                   'followings': followings,
-                   'followers': followers,
-                   'blogers': blogers}
-        return render(request, self.template_name, context=context)
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        user_id = self.request.user.id
+        context['posts'] = get_user_posts(user_id)
+        context['followings'] = get_user_following_objects(user_id)
+        context['followers'] = get_user_followers_objects(user_id)
+        context['blogers'] = User.objects.all()
+        return context
 
 
 class UserDetail(LoginRequiredMixin, View):
@@ -43,38 +46,36 @@ class UserDetail(LoginRequiredMixin, View):
         follower_user = User.objects.get(id=request.user.id)
         following_user = User.objects.get(id=id)
         if follow_unfollow(follower_user.id, following_user.id):
-            return HttpResponse('You are FOLLOW on this user')
-        return HttpResponse(f'You are UNFOLLOW on {following_user.email}')
+            messages.success(request, f'Your FOLLOW on user{following_user.email}')
+            return HttpResponseRedirect(request.path_info)
+        messages.error(request, f'Your UNFOLLOW on user{following_user.email}')
+        return HttpResponseRedirect(request.path_info)
 
 
-class PostCreate(LoginRequiredMixin, View):
+class PostCreate(CreateView):
     template_name = 'blog/post_create.html'
+    form_class = PostCreateForm
+    success_url = '/post_create'
 
-    def get(self, request):
-        form = PostCreateForm
-        return render(request, self.template_name, context={'form': form})
-
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         form = PostCreateForm(request.POST)
-        user_id = request.user.id
-        user = User.objects.get(id=user_id)
-        print(user)
+        user = User.objects.get(id=request.user.id)
         if form.is_valid():
             title = form.cleaned_data['title']
             text = form.cleaned_data['text']
             post = Post(title=title, text=text, author_name=user)
-            if save_post(post):
-                return HttpResponseRedirect('/home')
+            if post:
+                post.save()
+                messages.success(request, 'Your post was created')
+                return HttpResponseRedirect(request.path_info)
+            messages.error(request, 'Your post was not created')
             return HttpResponseRedirect('/post_create')
         return HttpResponse('Form is not valid')
 
 
-class PostDetail(LoginRequiredMixin, View):
-    template_name = 'blog/post_detail.html'
-
-    def get(self, request, id):
-        post = Post.objects.get(id=id)
-        return render(request, self.template_name, context={'post': post})
+class PostDetail(LoginRequiredMixin, DetailView):
+    model = Post
+    pk_url_kwarg = 'id'
 
 
 class LoginView(View):

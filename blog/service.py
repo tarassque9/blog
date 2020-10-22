@@ -36,7 +36,7 @@ def save_post(post_obj) -> bool:
         post_link = f'http://127.0.0.1:8000/post_detail/{post_obj.id}'
         emails_list = get_user_followers_emails(post_obj.id)
         if emails_list:
-            send_post_notification(emails_list, post_link)
+            #send_post_notification(emails_list, post_link)
             return True
     return False
 

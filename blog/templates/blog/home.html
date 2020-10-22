@@ -1,4 +1,5 @@
 {% extends 'blog/base.html' %} {% block titlle %} Home page {% endblock %} {% block content %}
+
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page">All blogers</li>
@@ -9,7 +10,8 @@
 </nav>
 My followings: {% for following in followings %} My followings: {{ following }} {% endfor %}
 <br> My followers: {% for follower in followers %} My followers: {{ follower }} {% endfor %}
-<center> {{ posts|length }} {% for post in posts %}
+
+<center> {% for post in posts %}
     <div class="card">
         <div class="card-header">
             <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
@@ -23,4 +25,4 @@ My followings: {% for following in followings %} My followings: {{ following }} 
             <input type="checkbox" aria-label="Checkbox for following text input" placeholder="text">
         </div>
     </div>
-    {% endfor %} </center> {% endblock %}
+    {% empty %} No posts {% endfor %} </center> {% endblock %}

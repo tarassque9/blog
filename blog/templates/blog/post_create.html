@@ -1,19 +1,23 @@
-{% extends 'blog/base.html' %} {% block titlle %} Create post {% endblock %} {% block content %}
-
-<form action="{% url 'post_create' %}" method="POST">
-    {% csrf_token %}
-    <div class="form-group">
-        <div class="input-group flex-nowrap">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="addon-wrapping">Title</span>
-            </div>
-            {{ form.title }}
+{% extends 'blog/base.html' %} {% block titlle %} Create post {% endblock %} {% block content %} {% if messages %} {% for message in messages %} {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+<div class="alert alert-danger" role="alert">
+    {{ message }}
+</div>
+{% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+<div class="alert alert-success" role="alert">
+    {{ message }}
+</div>
+{% endif %} {% endfor %} {% endif %}
+<center>
+    <form action="{% url 'post_create' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">{{ form.title }}
+            <label for="exampleInputEmail1">Title</label>
         </div>
-        <br>
-        <label></label> {{ form.text | safe }} {{ form.media }}
-        <br>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+        <div class="form-group">{{ form.text }}
+            <label for="exampleFormControlTextarea1">Text</label>
 
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</center>
 {% endblock %}

@@ -1,16 +1,18 @@
 {% extends 'blog/base.html' %} {% block titlle %} Login page {% endblock %} {% block content %}
 <center>
+    {{ next }}
     <form action="{% url 'login' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
-            <label>Email address</label><br> {{ form.email }}
+            <label>Email address</label> {{ form.email }}
         </div>
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {{ form.errors }}
+        </div>
+        {% endif %}
         <div class="form-group">
-            <label>Password</label><br> {{ form.password }} {% if form.password.errors %}
-            <div class="alert alert-danger">
-                {{ form.password.errors }}
-            </div>
-            {% endif %}
+            <label>Password</label> {{ form.password }}
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
